@@ -7,6 +7,7 @@ import colorlog
 from pathlib import Path
 from datetime import datetime
 from config.config import config
+import sys
 
 
 def get_logger(name):
@@ -27,9 +28,13 @@ def get_logger(name):
     
     logger.setLevel(getattr(logging, config.LOG_LEVEL))
     
-    # Console handler with colors
+    # Console handler with colors and UTF-8 encoding
     console_handler = colorlog.StreamHandler()
     console_handler.setLevel(getattr(logging, config.LOG_LEVEL))
+    
+    # Fix encoding for Windows console to handle Unicode characters
+    if sys.platform == 'win32':
+        console_handler.stream = open(sys.stdout.fileno(), mode='w', encoding='utf-8', buffering=1)
     
     console_format = colorlog.ColoredFormatter(
         '%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -45,9 +50,9 @@ def get_logger(name):
     console_handler.setFormatter(console_format)
     logger.addHandler(console_handler)
     
-    # File handler
+    # File handler with UTF-8 encoding
     log_file = config.LOGS_DIR / f"trading_{datetime.now().strftime('%Y%m%d')}.log"
-    file_handler = logging.FileHandler(log_file)
+    file_handler = logging.FileHandler(log_file, encoding='utf-8')
     file_handler.setLevel(logging.DEBUG)
     
     file_format = logging.Formatter(

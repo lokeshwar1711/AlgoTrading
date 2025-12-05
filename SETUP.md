@@ -1,114 +1,232 @@
 # Quick Setup Guide
 
-## Step 1: Create Virtual Environment
+## 🎯 Two Modes Available
+
+- **OFFLINE MODE**: Test and develop strategies without internet (recommended for corporate networks)
+- **ONLINE MODE**: Full functionality with live data (requires internet access)
+
+---
+
+## 📦 Step 1: Create Virtual Environment
 
 ```powershell
 # Navigate to project directory
-cd c:\Users\lokeshwar.reddy\project
+cd C:\Users\lokeshwar.reddy\project\AlgoTrading
 
 # Create virtual environment
 python -m venv venv
 
-# Activate virtual environment
+# Activate virtual environment (PowerShell)
 .\venv\Scripts\Activate.ps1
+
+# OR for Command Prompt
+venv\Scripts\activate.bat
 ```
 
-## Step 2: Install Dependencies
+---
+
+## 📥 Step 2: Install Dependencies
 
 ```powershell
+# Make sure venv is activated (you should see (venv) in prompt)
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-**Note**: If `ta-lib` installation fails (it often does on Windows), you can skip it. The project uses `pandas-ta` as an alternative, which is already included.
+**Note**: Installation takes 2-3 minutes. If any package fails, that's okay - core packages will work.
 
-To install ta-lib on Windows:
-1. Download the wheel file from https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib
-2. Install using: `pip install TA_Lib‑0.4.28‑cp311‑cp311‑win_amd64.whl` (adjust for your Python version)
+---
 
-## Step 3: Configure Environment
+## ⚙️ Step 3: Configure Environment
 
 ```powershell
-# Copy the template
+# Copy the template (if not done already)
 copy .env.template .env
 
-# Edit .env file with your settings
+# Edit .env file
 notepad .env
 ```
 
-Required settings in `.env`:
-```
-KITE_API_KEY=your_api_key_here
-KITE_API_SECRET=your_api_secret_here
+**For OFFLINE MODE** (Corporate Network):
+```ini
 TRADING_MODE=paper
 CAPITAL=100000
+DATA_SOURCE=offline
+KITE_API_KEY=
+KITE_API_SECRET=
+KITE_ACCESS_TOKEN=
 ```
 
-## Step 4: Test Installation
+**For ONLINE MODE** (With Internet):
+```ini
+TRADING_MODE=paper
+CAPITAL=100000
+DATA_SOURCE=yfinance
+KITE_API_KEY=your_key_here
+KITE_API_SECRET=your_secret_here
+KITE_ACCESS_TOKEN=
+```
+
+---
+
+## ✅ Step 4: Test Installation
+
+### OFFLINE Test (No Internet Needed):
+```powershell
+python test_offline.py
+```
+
+### ONLINE Test (Requires Internet):
+```powershell
+python test_online.py
+```
+
+---
+
+## 🚀 Step 5: Start Trading
+
+Choose based on your mode:
+
+### OFFLINE Mode Scripts:
+```powershell
+# Test strategies with sample data
+python run_offline.py
+
+# Run backtests with sample data
+python examples_offline.py
+```
+
+### ONLINE Mode Scripts:
+```powershell
+# Full system with live data
+python main.py
+
+# Examples with real market data
+python examples.py
+
+# Authenticate with Zerodha
+python authenticate.py
+```
+
+---
+
+## 🌐 ONLINE MODE Setup (For Home/Personal Machine)
+
+If you want to use the system with live market data:
+
+### 1. Setup Zerodha Kite API
 
 ```powershell
-# Run examples to test
-python examples.py
+# Create Kite Connect App at: https://developers.kite.trade/apps/new
+# Use these settings:
+#   Redirect URL: http://127.0.0.1:5000
+#   Postback URL: (leave blank)
 ```
 
-Select option 1 or 2 to verify everything is working.
+### 2. Update .env with API Credentials
 
-## Step 5: Run Your First Backtest
+```ini
+KITE_API_KEY=your_actual_api_key
+KITE_API_SECRET=your_actual_api_secret
+TRADING_MODE=paper
+DATA_SOURCE=yfinance
+```
+
+### 3. Authenticate
+
+```powershell
+python authenticate.py
+```
+
+Follow the prompts to get your access token.
+
+### 4. Run Online System
 
 ```powershell
 python main.py
 ```
 
-Choose option 1, enter a stock symbol like `RELIANCE`, and select a strategy.
+---
 
-## Common Issues & Solutions
+## 🔧 Troubleshooting
 
-### Issue: Import errors
-**Solution**: Make sure virtual environment is activated and all packages are installed
+### Issue: SSL Certificate Error (Corporate Network)
+**Solution**: Use OFFLINE mode
+```powershell
+python run_offline.py
+```
+
+### Issue: "Module not found"
+**Solution**: Activate venv and reinstall
 ```powershell
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-### Issue: "Could not resolve import" warnings
-**Solution**: These are just IDE warnings. The code will run fine. You can ignore them or configure your Python interpreter in VS Code.
+### Issue: Unicode (₹) not displaying
+**Solution**: Run with UTF-8 encoding
+```powershell
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$env:PYTHONIOENCODING = "utf-8"
+python your_script.py
+```
 
-### Issue: No data fetched for stock
-**Solution**: 
-- Check internet connection
-- Try with `.NS` suffix: `RELIANCE.NS`
-- Try different data source in config (yfinance or nsepy)
+### Issue: Virtual environment activation fails
+**Solution**: Enable script execution
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
 
-### Issue: Zerodha API errors
-**Solution**:
-- Verify API credentials
-- Generate a new access token
-- Check if account is active
+---
 
-## Next Steps
+## 📊 Quick Command Reference
 
-1. **Paper Trade First**: Always test with paper trading before going live
-2. **Backtest Thoroughly**: Test your strategies on at least 1 year of data
-3. **Start Small**: When going live, start with small amounts
-4. **Monitor Closely**: Watch your positions and logs carefully
+| Task | Offline | Online |
+|------|---------|--------|
+| **Test System** | `python test_offline.py` | `python test_online.py` |
+| **Run Examples** | `python examples_offline.py` | `python examples.py` |
+| **Start Trading** | `python run_offline.py` | `python main.py` |
+| **Backtest** | `python run_offline.py` → Option 1 | `python main.py` → Option 1 |
+| **Paper Trade** | `python run_offline.py` → Option 2 | `python main.py` → Option 3 |
 
-## Getting Zerodha API Credentials
+---
 
-1. Go to https://kite.zerodha.com/
-2. Login to your Zerodha account
-3. Go to Console → API → Create New App
-4. Fill in the details (app name, redirect URL, etc.)
-5. Note down the API Key and API Secret
-6. Add them to your `.env` file
+## 💡 Recommended Workflow
 
-## Running in Production
+**On Corporate Network (Offline)**:
+1. Develop and test strategies offline
+2. Use sample/historical data
+3. Perfect your strategy logic
+4. Export strategy code
 
-For live trading:
-1. Change `TRADING_MODE=live` in `.env`
-2. Generate access token first time
-3. Run with proper monitoring
-4. Keep logs directory monitored
+**On Personal Network (Online)**:
+1. Import your strategy
+2. Backtest with real data
+3. Paper trade with live data
+4. Move to live trading (when ready)
 
-## Support
+---
 
-Check the main README.md for detailed documentation.
+## 🎓 Next Steps
+
+1. ✅ Complete setup above
+2. ✅ Run offline test: `python test_offline.py`
+3. ✅ Try examples: `python run_offline.py`
+4. ✅ Create your first strategy
+5. ✅ Backtest thoroughly
+6. ⏸️ Setup online mode (when ready)
+7. ⏸️ Paper trade
+8. ⏸️ Live trade (with caution)
+
+---
+
+## 📞 Support
+
+- Check logs in `logs/` directory
+- Review configuration in `.env`
+- See full documentation in `README.md`
+- Kite API docs: https://kite.trade/docs/connect/v3/
+
+---
+
+**Ready to start? Run `python test_offline.py` or `python test_online.py`!** 🚀

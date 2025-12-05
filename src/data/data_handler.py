@@ -8,6 +8,11 @@ from nsepy import get_history
 from datetime import datetime, timedelta
 from src.utils.logger import get_logger
 from config.config import config
+import ssl
+import certifi
+
+# Fix SSL certificate verification for corporate networks
+ssl._create_default_https_context = ssl._create_unverified_context
 
 logger = get_logger(__name__)
 
